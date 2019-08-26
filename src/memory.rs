@@ -47,7 +47,7 @@ impl<T> Dma<T> {
                     ptr::null_mut(),
                     size,
                     libc::PROT_READ | libc::PROT_WRITE,
-                    libc::MAP_PRIVATE | libc::MAP_ANONYMOUS | libc::MAP_HUGETLB | MAP_HUGE_2MB,
+                    libc::MAP_PRIVATE | libc::MAP_ANONYMOUS /*| libc::MAP_HUGETLB | MAP_HUGE_2MB*/,
                     -1,
                     0,
                 )
@@ -86,7 +86,7 @@ impl<T> Dma<T> {
                             ptr::null_mut(),
                             size,
                             libc::PROT_READ | libc::PROT_WRITE,
-                            libc::MAP_SHARED | libc::MAP_HUGETLB,
+                            libc::MAP_SHARED /*| libc::MAP_HUGETLB*/,
                             f.as_raw_fd(),
                             0,
                         ) as *mut T
