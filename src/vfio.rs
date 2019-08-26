@@ -117,9 +117,7 @@ pub fn vfio_init(pci_addr: &str) -> Result<RawFd, Box<dyn Error>> {
     // Test the group is viable and available
     if unsafe { libc::ioctl(gfd, VFIO_GROUP_GET_STATUS, &group_status) } == -1 {
         return Err(
-            format!("failed to VFIO_GROUP_GET_STATUS. Errno: {}", unsafe {
-                *libc::__errno_location()
-            })
+            format!("failed to VFIO_GROUP_GET_STATUS. Errno: {}", std::io::Error::last_os_error())
             .into(),
         );
     }
@@ -132,9 +130,7 @@ pub fn vfio_init(pci_addr: &str) -> Result<RawFd, Box<dyn Error>> {
     // Add the group to the container
     if unsafe { libc::ioctl(gfd, VFIO_GROUP_SET_CONTAINER, &cfd) } == -1 {
         return Err(
-            format!("failed to VFIO_GROUP_SET_CONTAINER. Errno: {}", unsafe {
-                *libc::__errno_location()
-            })
+            format!("failed to VFIO_GROUP_SET_CONTAINER. Errno: {}", std::io::Error::last_os_error())
             .into(),
         );
     }
@@ -144,7 +140,7 @@ pub fn vfio_init(pci_addr: &str) -> Result<RawFd, Box<dyn Error>> {
         if unsafe { libc::ioctl(cfd, VFIO_SET_IOMMU, VFIO_TYPE1_IOMMU) } == -1 {
             return Err(format!(
                 "failed to VFIO_SET_IOMMU to VFIO_TYPE1_IOMMU. Errno: {}",
-                unsafe { *libc::__errno_location() }
+                std::io::Error::last_os_error()
             )
             .into());
         }
@@ -154,9 +150,7 @@ pub fn vfio_init(pci_addr: &str) -> Result<RawFd, Box<dyn Error>> {
     dfd = unsafe { libc::ioctl(gfd, VFIO_GROUP_GET_DEVICE_FD, pci_addr) };
     if dfd == -1 {
         return Err(
-            format!("failed to VFIO_GROUP_GET_DEVICE_FD. Errno: {}", unsafe {
-                *libc::__errno_location()
-            })
+            format!("failed to VFIO_GROUP_GET_DEVICE_FD. Errno: {}", std::io::Error::last_os_error())
             .into(),
         );
     }
@@ -187,7 +181,7 @@ pub fn vfio_enable_dma(device_file_descriptor: RawFd) -> Result<(), Box<dyn Erro
     {
         return Err(format!(
             "failed to VFIO_DEVICE_GET_REGION_INFO for index VFIO_PCI_CONFIG_REGION_INDEX. Errno: {}",
-            unsafe { *libc::__errno_location() }
+            std::io::Error::last_os_error()
         ).into());
     }
 
@@ -201,9 +195,7 @@ pub fn vfio_enable_dma(device_file_descriptor: RawFd) -> Result<(), Box<dyn Erro
         )
     } == -1
     {
-        return Err(format!("failed to pread DMA bit. Errno: {}", unsafe {
-            *libc::__errno_location()
-        })
+        return Err(format!("failed to pread DMA bit. Errno: {}", std::io::Error::last_os_error())
         .into());
     }
 
@@ -218,9 +210,7 @@ pub fn vfio_enable_dma(device_file_descriptor: RawFd) -> Result<(), Box<dyn Erro
         )
     } == -1
     {
-        return Err(format!("failed to pwrite DMA bit. Errno: {}", unsafe {
-            *libc::__errno_location()
-        })
+        return Err(format!("failed to pwrite DMA bit. Errno: {}", std::io::Error::last_os_error())
         .into());
     }
     Ok(())
@@ -238,9 +228,7 @@ pub fn vfio_map_region(fd: RawFd, index: u32) -> Result<(*mut u8, usize), Box<dy
     };
     if unsafe { libc::ioctl(fd, VFIO_DEVICE_GET_REGION_INFO, &region_info) } == -1 {
         return Err(
-            format!("failed to VFIO_DEVICE_GET_REGION_INFO. Errno: {}", unsafe {
-                *libc::__errno_location()
-            })
+            format!("failed to VFIO_DEVICE_GET_REGION_INFO. Errno: {}", std::io::Error::last_os_error())
             .into(),
         );
     }
@@ -258,9 +246,7 @@ pub fn vfio_map_region(fd: RawFd, index: u32) -> Result<(*mut u8, usize), Box<dy
         )
     };
     if ptr == libc::MAP_FAILED {
-        return Err(format!("failed to mmap region. Errno: {}", unsafe {
-            *libc::__errno_location()
-        })
+        return Err(format!("failed to mmap region. Errno: {}", std::io::Error::last_os_error())
         .into());
     }
     let addr = ptr as *mut u8;
